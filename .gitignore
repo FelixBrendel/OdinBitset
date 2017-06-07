@@ -1,0 +1,8 @@
+# ignore compiled stuff
+main
+*.bc
+*.ll
+*.o
+*.exe
+/java
+.atom-build.cson
