@@ -1,0 +1,14 @@
+cmd: "/home/felix/coding/Odin/odind.sh"
+name: "Run Odin"
+args: [
+    "run"
+    "src/main.odin"
+]
+sh: "true"
+
+errorMatch: [
+     "(?<file>[\\/0-9a-zA-Z\\._\\\\:]+)\\((?<line>\\d+):(?<col>\\d+)\\)\\s+(?<message>.+)"
+     "\\s*at\\s(?<file>[\\/0-9a-zA-Z\\._\\\\:]+)\\((?<line>\\d+):(?<col>\\d+)\\)"
+]
+keymap: "f5"
+atomCommandName: "odin:Run"
