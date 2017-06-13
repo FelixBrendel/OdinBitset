@@ -5,8 +5,18 @@ Bitset :: struct {
 	is_not_set : bool,
 }
 
-create_set :: proc () -> ^Bitset {
-	return new(Bitset);
+create_set :: proc (pos : ..uint) -> ^Bitset {
+	r := new(Bitset);
+	set(r, ..pos);
+	return r;
+}
+copy_set :: proc (using b : ^Bitset) -> ^Bitset {
+	ret := new(Bitset);
+	for _u32 in bits {
+		append(ret.bits, _u32);
+	}
+	ret.is_not_set = is_not_set;
+	return ret;
 }
 
 destroy_set :: proc (using b : ^Bitset) {
@@ -31,11 +41,48 @@ __elementary_unset :: proc (using b : ^Bitset, pos : ..uint) {
 	}
 }
 
-__elementary_get :: proc (using b : ^Bitset, pos : uint)  -> bool{
+__elementary_get :: proc (using b : ^Bitset, pos : uint)  -> bool {
 	if uint(len(bits)) * 32 < pos {
 		return false;
 	}
 	return bits[pos >> 5] & (1 << (pos % 32)) != 0;
+}
+
+__elementary_union :: proc (a : ^Bitset, b : ^Bitset) -> ^Bitset {
+	if len(a.bits) < len(b.bits) {
+		a, b = b, a;
+	}
+	ret := copy_set(a);
+	for _u32, idx in b.bits {
+		ret.bits[idx] |= _u32;
+	}
+	return ret;
+}
+
+__elementary_cut :: proc (a : ^Bitset, b : ^Bitset) -> ^Bitset {
+	if len(a.bits) < len(b.bits) {
+		a, b = b, a;
+	}
+	ret := copy_set(b);
+	for _, idx in b.bits {
+		ret.bits[idx] &= a.bits[idx];
+	}
+	return ret;
+}
+
+__elementary_difference :: proc (a : ^Bitset, b : ^Bitset) -> ^Bitset {
+	ret := copy_set(a);
+	min := (len(a.bits) > len(b.bits) ? len(b.bits) : len(a.bits));
+	for idx in 0 ..< min {
+		ret.bits[idx] &~= b.bits[idx];
+	}
+	__fix_len(ret);
+	return ret;
+}
+
+__fix_len :: proc (using b : ^Bitset) {
+	// TODO(Felix): Implement as soon as @ginger_bill has a pop_back
+	// function for dynamic arrays
 }
 
 set :: proc (using b : ^Bitset, pos : ..uint) {
@@ -64,7 +111,7 @@ get :: proc (using b : ^Bitset, pos : uint) -> bool {
 get_all :: proc (using b : ^Bitset) -> []uint {
 	ret : [dynamic]uint;
 	// skipping bounds check by not calling get
-	for i in 0..<uint(32 * len(bits)) {
+	for i in 0 ..< uint(32 * len(bits)) {
 		if is_not_set {
 			if bits[i >> 5] & (1 << (i % 32)) == 0 {
 				append(ret, i);
@@ -78,40 +125,66 @@ get_all :: proc (using b : ^Bitset) -> []uint {
 	return ret[..];
 }
 
-copy_bitset :: proc (using b : ^Bitset) -> ^Bitset {
-	ret := new(Bitset);
-	for _u32 in bits {
-		append(ret.bits, _u32);
-	}
-	ret.is_not_set = is_not_set;
-	return ret;
-}
-
-
-union_set :: proc (a : ^Bitset, b : ^Bitset) -> ^Bitset {
-	if len(a.bits) < len(b.bits) {
-		a, b = b, a;
-	}
-	ret := copy_bitset(a);
-	for _u32, idx in b.bits {
-		ret.bits[idx] |= _u32;
-	}
+not_set ::  proc (a : ^Bitset) -> ^Bitset {
+	using ret := copy_set(a);
+	is_not_set = is_not_set == true ?  false : true;
 	return ret;
 }
 
 cut_set :: proc (a : ^Bitset, b : ^Bitset) -> ^Bitset {
-	if len(a.bits) < len(b.bits) {
-		a, b = b, a;
+	if a.is_not_set == b.is_not_set { // neither or both are not_sets
+		if !a.is_not_set {    // neither are
+			return __elementary_cut(a, b);
+		} else {                      // both are
+			return __elementary_union(a, b);
+		}
+	} else {                          // one of them is a not_set
+		if a.is_not_set {
+			return __elementary_difference(b, a);
+		} else {
+			return __elementary_difference(a, b);
+		}
 	}
-	ret := copy_bitset(b);
-	for _, idx in b.bits {
-		ret.bits[idx] &= a.bits[idx];
-	}
-	return ret;
 }
 
-not_set ::  proc (a : ^Bitset) -> ^Bitset {
-	using ret := copy_bitset(a);
-	is_not_set = is_not_set == false ? true : false;
-	return ret;
+union_set :: proc (a : ^Bitset, b : ^Bitset) -> ^Bitset {
+	if a.is_not_set == b.is_not_set { // neither or both are not_sets
+		if !a.is_not_set {    // neither are
+			return __elementary_union(a, b);
+		} else {                      // both are
+			return __elementary_cut(a, b);
+		}
+	} else {                          // one of them is a not_set
+		if a.is_not_set {
+			ret := __elementary_difference(b, a);
+			ret.is_not_set = true;
+			return ret;
+		} else {
+			ret := __elementary_difference(a, b);
+			ret.is_not_set = true;
+			return ret;
+		}
+	}
+}
+
+difference_set :: proc (a : ^Bitset, b : ^Bitset) -> ^Bitset {
+	if a.is_not_set == b.is_not_set { // neither or both are not_sets
+		if !a.is_not_set{    // neither are
+			return __elementary_difference(a, b);
+		} else {                      // both are
+			ret := __elementary_difference(b, a);
+			ret.is_not_set = false;
+			return ret;
+		}
+	} else {                          // one of them is a not_set
+		if a.is_not_set {
+			ret := __elementary_union(a, b);
+			ret.is_not_set = true;
+			return ret;
+		} else {
+			ret := __elementary_cut(a, b);
+			ret.is_not_set = false;
+			return ret;
+		}
+	}
 }

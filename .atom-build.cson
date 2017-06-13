@@ -1,11 +1,22 @@
-cmd: "/home/felix/coding/Odin/odind.sh"
+cmd: "odind"
 name: "Run Odin"
 args: [
     "run"
-    "src/main.odin"
+    "main.odin"
 ]
 sh: "true"
-
+cwd: "src"
+env:
+  # path: odin.exe, link.exe, xcopy.exe
+  # include: stuff for link.exe
+  # lib: libcmt.lib, libucrt.lib, krenel32.lib
+  path:    "C:\\Languages\\Odin;\
+            D:\\Programme\\Visual Studio 15\\VC\\bin\\amd64;\
+            C:\\Windows\\System32"
+  include: "D:\\Programme\\Visual Studio 15\\VC\\INCLUDE;"
+  lib:     "D:\\Programme\\Visual Studio 15\\VC\\LIB\\amd64;\
+            C:\\Program Files (x86)\\Windows Kits\\10\\lib\\10.0.10240.0\\ucrt\\x64;\
+            C:\\Program Files (x86)\\Windows Kits\\8.1\\lib\\winv6.3\\um\\x64;"
 errorMatch: [
      "(?<file>[\\/0-9a-zA-Z\\._\\\\:]+)\\((?<line>\\d+):(?<col>\\d+)\\)\\s+(?<message>.+)"
      "\\s*at\\s(?<file>[\\/0-9a-zA-Z\\._\\\\:]+)\\((?<line>\\d+):(?<col>\\d+)\\)"
