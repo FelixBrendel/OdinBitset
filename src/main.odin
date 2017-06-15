@@ -1,6 +1,6 @@
-#load "testBitset.odin";
-#load "fmt.odin";
+import_load "test/testAll.odin";
+import_load "fmt.odin";
 
-main :: proc () {
+proc main () {
     test();
 }

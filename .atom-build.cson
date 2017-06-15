@@ -1,4 +1,4 @@
-cmd: "odind"
+cmd: "odin"
 name: "Run Odin"
 args: [
     "run"

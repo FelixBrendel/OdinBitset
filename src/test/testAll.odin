@@ -1,40 +1,21 @@
-#load "bitset.odin";
-#load "fmt.odin";
+import_load "fmt.odin";
+import_load "testSet.odin";
+import_load "testUnset.odin";
 
-test :: proc () {
+proc test () {
 	test_set();
-	test_get();
 	test_unset();
+	/*test_get();
 	test_copy_set();
 	test_cut_set();
 	test_union_set();
-	test_difference_set();
+	test_difference_set();*/
 
 	println("All tests passed.");
 }
 
-test_set :: proc () {
-	a := create_set();
-	set(a, 1);
-	assert(len(a.bits) == 1);
-	assert(a.bits[0] == 2);
 
-	set(a, 32);
-	assert(len(a.bits) == 2);
-	assert(a.bits[0] == 2);
-	assert(a.bits[1] == 1);
-
-	set(a, 0);
-	assert(len(a.bits) == 2);
-	assert(a.bits[0] == 3);
-	assert(a.bits[1] == 1);
-
-	set(a, 0, 1, 2, 3);
-	assert(len(a.bits) == 2);
-	assert(a.bits[0] == 15);
-	assert(a.bits[1] == 1);
-}
-
+/*
 test_get :: proc () {
 	a := create_set(0, 2, 4, 5, 33, 100);
 
@@ -62,20 +43,6 @@ test_get :: proc () {
 	assert(ga[5] == 100);
 }
 
-test_unset :: proc () {
-	a := create_set(1, 3, 7, 51, 33);
-
-	unset(a, 0);
-	unset(a, 1);
-	unset(a, 10, 2, 7);
-
-	ga := get_all(a);
-
-	assert(len(ga) == 3);
-	assert(ga[0] == 3);
-	assert(ga[1] == 33);
-	assert(ga[2] == 51);
-}
 
 test_copy_set :: proc () {
 	a := create_set(1, 2, 4);
@@ -220,4 +187,4 @@ test_difference_set :: proc () {
 	d = difference_set(a, b);
 	ga = get_all(d);
 	assert(len(ga) == 56);
-}
+}*/
