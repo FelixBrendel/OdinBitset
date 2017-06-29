@@ -1,13 +1,14 @@
 import_load "fmt.odin";
 import_load "testSet.odin";
 import_load "testUnset.odin";
+import_load "testCutSet.odin";
 
-proc test () {
+test :: proc() {
 	test_set();
 	test_unset();
+	test_cut_set();
 	/*test_get();
 	test_copy_set();
-	test_cut_set();
 	test_union_set();
 	test_difference_set();*/
 
@@ -65,43 +66,6 @@ test_copy_set :: proc () {
 	c = not_set(c);
 	d := copy_set(c);
 	assert(d.is_not_set);
-}
-
-test_cut_set :: proc () {
-	// no not_sets
-	a := create_set(1, 2, 4, 32);
-	b := create_set(1, 3, 5, 32);
-	c := cut_set(a, b);
-
-	ga := get_all(c);
-
-	assert(len(ga) == 2);
-	assert(ga[0] == 1);
-	assert(ga[1] == 32);
-
-	// both not sets
-	a = not_set(a);
-	b = not_set(b);
-	c = cut_set(a, b);
-	ga = get_all(c);
-	assert(len(ga) == 58);
-
-	// one only not set
-	a = not_set(a);
-	c = cut_set(a, b);
-	ga = get_all(c);
-	assert(len(ga) == 2);
-	assert(ga[0] == 2);
-	assert(ga[1] == 4);
-
-	d := create_set(1,2,3,10,33);
-	f := create_set(1,3,33);
-	f = not_set(f);
-	cs := cut_set(d, f);
-	get := get_all(cs);
-	assert(len(get) == 2);
-	assert(get[0] == 2);
-	assert(get[1] == 10);
 }
 
 test_union_set :: proc () {

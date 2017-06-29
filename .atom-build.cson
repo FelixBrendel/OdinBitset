@@ -1,10 +1,10 @@
-cmd: "odin"
+cmd: "odind"
 name: "Run Odin"
 args: [
     "run"
     "main.odin"
 ]
-sh: "true"
+sh: "false"
 cwd: "src"
 env:
   # path: odin.exe, link.exe, xcopy.exe
